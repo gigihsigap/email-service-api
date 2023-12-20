@@ -4,80 +4,84 @@ import {
   Delete,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   Patch,
   Post,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateGoalDto, UpdateGoalDto } from './dtos/index';
 import { Goal } from './entities/goal.entity';
-import { Priority, Status } from './enums/index';
 
 @Controller('goals')
 export class GoalsController {
-  private goals: Goal[] = [
-    {
-      id: 1,
-      name: 'Learn tRPC',
-      priority: Priority.LOW,
-      status: Status.TODO,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: 2,
-      name: 'Learn Nest.js',
-      priority: Priority.HIGH,
-      status: Status.IN_PROGRESS,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
+  // Dependency Injection
+  constructor(
+    @InjectRepository(Goal) private readonly repository: Repository<Goal>,
+  ) {}
 
+  // GET /api/v1/goals
   @Get()
-  findAll() {
-    return this.goals;
+  async findAll() {
+    const goals = await this.repository.find();
+
+    return { success: true, count: goals.length, data: goals };
   }
 
+  // GET /api/v1/goals/:id
   @Get(':id')
-  findOne(@Param('id') id) {
-    const goal = this.goals.find((goal) => goal.id === parseInt(id));
+  async findOne(@Param('id') id) {
+    const goal = await this.repository.findOneBy({ id });
 
-    return goal;
+    if (!goal) {
+      throw new NotFoundException();
+    }
+
+    return { success: true, data: goal };
   }
 
+  // POST /api/v1/goals
   @Post()
-  create(@Body() input: CreateGoalDto) {
-    const goal = {
+  async create(@Body() input: CreateGoalDto) {
+    const goal = await this.repository.save({
       ...input,
-      createdAt: new Date(input.createdAt),
-      updatedAt: new Date(input.updatedAt),
-      id: this.goals.length + 1,
-    };
+      createdAt: input.createdAt,
+      updatedAt: input.updatedAt,
+    });
 
-    this.goals.push(goal);
+    return { success: true, data: goal };
   }
 
+  // PATCH /api/v1/goals/:id
   @Patch(':id')
-  update(@Param('id') id, @Body() input: UpdateGoalDto) {
-    const index = this.goals.findIndex((goal) => goal.id === parseInt(id));
+  async update(@Param('id') id, @Body() input: UpdateGoalDto) {
+    const goal = await this.repository.findOneBy({ id });
 
-    this.goals[index] = {
-      ...this.goals[index],
+    if (!goal) {
+      throw new NotFoundException();
+    }
+
+    const data = await this.repository.save({
+      ...goal,
       ...input,
-      createdAt: input.createdAt
-        ? new Date(input.createdAt)
-        : this.goals[index].createdAt,
-      updatedAt: input.updatedAt
-        ? new Date(input.updatedAt)
-        : this.goals[index].updatedAt,
-    };
+      createdAt: input.createdAt ?? goal.createdAt,
+      updatedAt: input.updatedAt ?? goal.updatedAt,
+    });
 
-    return this.goals[index];
+    return { success: true, data };
   }
 
+  // DELETE /api/v1/goals/:id
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id) {
-    this.goals = this.goals.filter((goal) => goal.id !== parseInt(id));
+  async remove(@Param('id') id) {
+    const goal = await this.repository.findOneBy({ id });
+
+    if (!goal) {
+      throw new NotFoundException();
+    }
+
+    await this.repository.remove(goal);
   }
 }
