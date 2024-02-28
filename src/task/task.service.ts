@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, Interval, Timeout } from '@nestjs/schedule';
 import * as moment from 'moment-timezone';
 import { map } from 'rxjs/operators';
-import { UserService } from 'src/users/user.service';
+import { UserService } from 'src/user/user.service';
 
 // users DB
 // const users = [

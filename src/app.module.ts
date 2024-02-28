@@ -5,13 +5,11 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import ormConfig from './config/orm.config';
 import ormConfigProd from './config/orm.config.prod';
-import { EmailQueue, User, FailedQueue } from './users/entities/user.entity';
-import { UserController } from './users/user.controller';
+import { EmailQueue, User, FailedQueue } from './user/entities/user.entity';
+import { UserController } from './user/user.controller';
 import { ScheduleModule } from '@nestjs/schedule';
-import { TasksModule } from './tasks/tasks.module';
-import { UserService } from './users/user.service';
-// import { UserService } from './users/users.service';
-// import { UsersModule } from './users/users.module';
+import { TasksModule } from './task/task.module';
+import { UserService } from './user/user.service';
 
 @Module({
   imports: [
