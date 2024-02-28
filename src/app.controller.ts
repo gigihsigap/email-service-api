@@ -1,7 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import * as moment from 'moment-timezone';
-// import { UsersService } from './users/users.service';
 
 function isValidTimezone(timezone) {
   console.log("Timezone:", timezone)
@@ -11,7 +10,7 @@ function isValidTimezone(timezone) {
 export class AppController {
   constructor(
     private readonly appService: AppService,
-    // private readonly userService: UsersService
+    // private readonly userService: UserService
   ) {}
 
   @Get()

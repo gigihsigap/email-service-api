@@ -1,36 +1,36 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
+import { UserController } from './user.controller';
+import { UserService } from './user.service';
 
-describe('UsersController', () => {
-  let usersController: UsersController;
-  let usersService: UsersService;
+describe('UserController', () => {
+  let userController: UserController;
+  let userService: UserService;
 
   beforeEach(() => {
-    usersService = new UsersService(null, null, null);
-    usersController = new UsersController(usersService);
+    userService = new UserService(null, null, null);
+    userController = new UserController(userService);
   });
 
   describe('User - Controller and Service', () => {
     it('should be defined', () => {
-      expect(usersController).toBeDefined();
-      expect(usersService).toBeDefined();
+      expect(userController).toBeDefined();
+      expect(userService).toBeDefined();
     });
   });
 });
 
-// describe('UsersController', () => {
-//   let controller: UsersController;
-//   let service: UsersService;
+// describe('UserController', () => {
+//   let controller: UserController;
+//   let service: UserService;
 
 //   beforeEach(async () => {
 //     const module: TestingModule = await Test.createTestingModule({
-//       controllers: [UsersController],
+//       controllers: [UserController],
 //       providers: [
 //         {
-//           provide: UsersService,
+//           provide: UserService,
 //           useValue: {
 //             findAll: jest.fn().mockResolvedValue([
 //               {
@@ -74,8 +74,8 @@ describe('UsersController', () => {
 //       ],
 //     }).compile();
 
-//     controller = module.get<UsersController>(UsersController);
-//     service = module.get<UsersService>(UsersService);
+//     controller = module.get<UserController>(UserController);
+//     service = module.get<UserService>(UserService);
 //   });
 
 //   it('should be defined', () => {

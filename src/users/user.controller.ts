@@ -12,19 +12,19 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from './dtos/index';
-import { UsersService } from './users.service';
+import { UserService } from './user.service';
 
-@Controller('users')
-export class UsersController {
+@Controller('user')
+export class UserController {
   // Dependency Injection
   constructor(
-    private readonly usersService: UsersService
+    private readonly userService: UserService
   ) {}
 
   // GET /api/v1/users
   @Get()
   async findAll() {
-    const users = await this.usersService.findAll();
+    const users = await this.userService.findAll();
 
     return { success: true, count: users.length, data: users };
   }
@@ -32,7 +32,7 @@ export class UsersController {
   // GET /api/v1/users/:id
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const user = await this.usersService.findOne(id);
+    const user = await this.userService.findOne(id);
 
     return { success: true, data: user };
   }
@@ -40,7 +40,7 @@ export class UsersController {
   // POST /api/v1/users
   @Post()
   async create(@Body() input: CreateUserDto) {
-    const user = await this.usersService.create(input);
+    const user = await this.userService.create(input);
 
     return { success: true, data: user };
   }
@@ -48,13 +48,13 @@ export class UsersController {
   // PATCH /api/v1/users/:id
   @Patch(':id')
   async update(@Param('id') id, @Body() input: UpdateUserDto) {
-    const user = await this.usersService.findOne(id);
+    const user = await this.userService.findOne(id);
 
     if (!user) {
       throw new NotFoundException();
     }
 
-    const data = await this.usersService.update(user, input)
+    const data = await this.userService.update(user, input)
 
     return { success: true, data };
   }
@@ -64,12 +64,12 @@ export class UsersController {
   @HttpCode(204)
   async remove(@Param('id') id) {
     // const user = await this.repository.findOneBy({ id });
-    const user = await this.usersService.findOne(id);
+    const user = await this.userService.findOne(id);
 
     if (!user) {
       throw new NotFoundException();
     }
 
-    await this.usersService.remove(user);
+    await this.userService.remove(user);
   }
 }

@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, Interval, Timeout } from '@nestjs/schedule';
 import * as moment from 'moment-timezone';
 import { map } from 'rxjs/operators';
-import { UsersService } from 'src/users/users.service';
+import { UserService } from 'src/users/user.service';
 
 // users DB
 // const users = [
@@ -26,7 +26,7 @@ const failedQueue = []
 export class TasksService {
   constructor(
     private readonly httpService: HttpService,
-    private readonly usersService: UsersService,
+    private readonly userService: UserService,
   ) {}
 
   private readonly logger = new Logger(TasksService.name);
@@ -38,7 +38,7 @@ export class TasksService {
     this.logger.debug('Retrieving all emails within the timezone...');
 
     // TODO: Read all emails from DB and insert to email_queue DB
-    const users = await this.usersService.findAll();
+    const users = await this.userService.findAll();
 
     const targetHour = 9; // Target hour to send emails
     const currentUtcHour = moment.utc().hour(); // Current hour in UTC
@@ -65,10 +65,7 @@ export class TasksService {
 
     console.log("Filtered user:", filteredUsers)
 
-    // filteredUsers.forEach((user) => {
-    //   let time = moment.tz(user.birthdate, user.location);
-    //   let format = time.format();
-    // });
+    // TODO: Write to email_queue table
 
     await this.processQueueEmails();
   }

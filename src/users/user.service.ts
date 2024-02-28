@@ -26,7 +26,7 @@ const arr = [
 ]
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(EmailQueue) private readonly emailQueueRepository: Repository<EmailQueue>,

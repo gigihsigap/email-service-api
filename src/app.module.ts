@@ -6,11 +6,11 @@ import { AppService } from './app.service';
 import ormConfig from './config/orm.config';
 import ormConfigProd from './config/orm.config.prod';
 import { EmailQueue, User, FailedQueue } from './users/entities/user.entity';
-import { UsersController } from './users/users.controller';
+import { UserController } from './users/user.controller';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './tasks/tasks.module';
-import { UsersService } from './users/users.service';
-// import { UsersService } from './users/users.service';
+import { UserService } from './users/user.service';
+// import { UserService } from './users/users.service';
 // import { UsersModule } from './users/users.module';
 
 @Module({
@@ -27,8 +27,8 @@ import { UsersService } from './users/users.service';
     }),
     TypeOrmModule.forFeature([User, EmailQueue, FailedQueue])
   ],
-  controllers: [AppController, UsersController],
-  providers: [AppService, UsersService],
+  controllers: [AppController, UserController],
+  providers: [AppService, UserService],
 })
 export class AppModule {}
 

@@ -18,7 +18,7 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: number;
 
-  @PrimaryColumn({ unique: true })
+  @PrimaryColumn()
   @IsEmail()
   email_address: string;
 
@@ -31,10 +31,10 @@ export class User {
   @Column()
   last_name: string;
 
-  @Column()
+  @Column({ nullable: false })
   birthdate: Date;
 
-  @Column()
+  @Column({ nullable: false })
   location: string;
 
   @CreateDateColumn()
