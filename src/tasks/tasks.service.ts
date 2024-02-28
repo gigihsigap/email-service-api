@@ -1,20 +1,22 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, Interval, Timeout } from '@nestjs/schedule';
+import * as moment from 'moment-timezone';
 import { map } from 'rxjs/operators';
+import { UsersService } from 'src/users/users.service';
 
 // users DB
-const users = [
-  '1@gmail.com',
-  '2@gmail.com',
-  '3@gmail.com',
-  '4@gmail.com',
-  '5@gmail.com',
-  '6@gmail.com',
-  '7@gmail.com',
-  '8@gmail.com',
-  '9@gmail.com'
-]
+// const users = [
+//   '1@gmail.com',
+//   '2@gmail.com',
+//   '3@gmail.com',
+//   '4@gmail.com',
+//   '5@gmail.com',
+//   '6@gmail.com',
+//   '7@gmail.com',
+//   '8@gmail.com',
+//   '9@gmail.com'
+// ]
 // email_queue DB
 const emailQueue = []
 // failed_queue DB
@@ -22,9 +24,54 @@ const failedQueue = []
 
 @Injectable()
 export class TasksService {
-  constructor(private readonly httpService: HttpService) {}
+  constructor(
+    private readonly httpService: HttpService,
+    private readonly usersService: UsersService,
+  ) {}
 
   private readonly logger = new Logger(TasksService.name);
+
+  // @Timeout(5000) // Once after 5 seconds
+  // @Cron('* * * * *') // At every minute
+  @Cron('0 * * * *') // At minute 0 (every hour)
+  async getRecipientEmails() {
+    this.logger.debug('Retrieving all emails within the timezone...');
+
+    // TODO: Read all emails from DB and insert to email_queue DB
+    const users = await this.usersService.findAll();
+
+    const targetHour = 9; // Target hour to send emails
+    const currentUtcHour = moment.utc().hour(); // Current hour in UTC
+    let offsetHours: number;
+
+    if (currentUtcHour < targetHour) {
+      offsetHours = targetHour - currentUtcHour;
+    } else if (currentUtcHour > targetHour) {
+      offsetHours = -(currentUtcHour - targetHour);
+    } else {
+      offsetHours = 0;
+    }
+
+    const selectedTimezoneOffset = moment().utcOffset(offsetHours * 60).format('Z');
+    // const selectedTimezoneOffset = '+09:00'; // Example: Selecting '+07:00' hours UTC
+
+    console.log("currentUtcHour", currentUtcHour)
+    console.log("selectedTimezoneOffset", selectedTimezoneOffset)
+
+    const filteredUsers = users.filter((user) => {
+      let userTimezoneOffset = moment.tz(user.location).format('Z'); // Get the timezone offset of the user's location
+      return userTimezoneOffset === selectedTimezoneOffset;
+    });
+
+    console.log("Filtered user:", filteredUsers)
+
+    // filteredUsers.forEach((user) => {
+    //   let time = moment.tz(user.birthdate, user.location);
+    //   let format = time.format();
+    // });
+
+    await this.processQueueEmails();
+  }
 
   async processQueueEmails() {
     // TODO: Read all emails from email_queue table
@@ -64,15 +111,7 @@ export class TasksService {
     console.log("Writing emails to failedQueue table:", emails)
   }
 
-  // @Cron('0 * * * *') // At minute 0 (every hour)
-  // @Cron('* * * * *') // At every minute
-  @Timeout(5000) // Once after 5 seconds
-  async getRecipientEmails() {
-    this.logger.debug('Retrieving all emails within the timezone...');
-
-    // TODO: Read all emails from DB and insert to email_queue DB
-    await this.processQueueEmails();
-  }
+  
 
   
   // @Cron('45 * * * * *')

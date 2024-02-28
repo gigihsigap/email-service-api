@@ -2,18 +2,28 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Status } from '../enums';
+
+import { IsEmail } from 'class-validator';
 
 @Entity()
+@Index(['email_address', 'template'], { unique: true })
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: number;
+
+  @PrimaryColumn({ unique: true })
+  @IsEmail()
+  email_address: string;
+
+  @PrimaryColumn()
+  template: string;
 
   @Column()
   first_name: string;
@@ -28,22 +38,6 @@ export class User {
   location: string;
 
   @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-}
-
-@Entity()
-export class EmailQueue {
-  @PrimaryColumn()
-  email_address: string;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'email_address' })
-  user: User;
-
-  @CreateDateColumn()
   created_at: Date;
 
   @UpdateDateColumn()
@@ -51,16 +45,24 @@ export class EmailQueue {
 }
 
 @Entity()
-export class FailedQueue {
-  @PrimaryColumn()
+export class EmailQueue {
   @CreateDateColumn()
+  @PrimaryColumn()
   timestamp: Date;
 
+  @ManyToOne(() => User)
+  @JoinColumn([{ name: 'email_address', referencedColumnName: 'email_address' }, { name: 'template', referencedColumnName: 'template' }])
+  user: User;
+}
+
+@Entity()
+export class FailedQueue {
+  @CreateDateColumn()
   @PrimaryColumn()
-  email_address: string;
+  timestamp: Date;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'email_address' })
+  @JoinColumn([{ name: 'email_address', referencedColumnName: 'email_address' }, { name: 'template', referencedColumnName: 'template' }])
   user: User;
 }
 
@@ -81,7 +83,7 @@ export class FailedQueue {
 //   status: Status;
 
 //   @CreateDateColumn()
-//   createdAt: Date;
+//   created_at: Date;
 
 //   @UpdateDateColumn()
 //   updatedAt: Date;

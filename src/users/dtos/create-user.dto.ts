@@ -3,6 +3,6 @@ export class CreateUserDto {
   last_name: string;
   birthdate: Date;
   location: string;
-  createdAt: string;
-  updatedAt: string;
+  created_at: string;
+  updated_at: string;
 }

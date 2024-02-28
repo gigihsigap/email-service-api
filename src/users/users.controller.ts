@@ -12,31 +12,27 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from './dtos/index';
-import { User } from './entities/user.entity';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
   // Dependency Injection
   constructor(
-    @InjectRepository(User) private readonly repository: Repository<User>,
+    private readonly usersService: UsersService
   ) {}
 
   // GET /api/v1/users
   @Get()
   async findAll() {
-    const users = await this.repository.find();
+    const users = await this.usersService.findAll();
 
     return { success: true, count: users.length, data: users };
   }
 
   // GET /api/v1/users/:id
   @Get(':id')
-  async findOne(@Param('id') id) {
-    const user = await this.repository.findOneBy({ id });
-
-    if (!user) {
-      throw new NotFoundException();
-    }
+  async findOne(@Param('id') id: string) {
+    const user = await this.usersService.findOne(id);
 
     return { success: true, data: user };
   }
@@ -44,11 +40,7 @@ export class UsersController {
   // POST /api/v1/users
   @Post()
   async create(@Body() input: CreateUserDto) {
-    const user = await this.repository.save({
-      ...input,
-      createdAt: input.createdAt,
-      updatedAt: input.updatedAt,
-    });
+    const user = await this.usersService.create(input);
 
     return { success: true, data: user };
   }
@@ -56,18 +48,13 @@ export class UsersController {
   // PATCH /api/v1/users/:id
   @Patch(':id')
   async update(@Param('id') id, @Body() input: UpdateUserDto) {
-    const user = await this.repository.findOneBy({ id });
+    const user = await this.usersService.findOne(id);
 
     if (!user) {
       throw new NotFoundException();
     }
 
-    const data = await this.repository.save({
-      ...user,
-      ...input,
-      createdAt: input.createdAt ?? user.createdAt,
-      updatedAt: input.updatedAt ?? user.updatedAt,
-    });
+    const data = await this.usersService.update(user, input)
 
     return { success: true, data };
   }
@@ -76,12 +63,13 @@ export class UsersController {
   @Delete(':id')
   @HttpCode(204)
   async remove(@Param('id') id) {
-    const user = await this.repository.findOneBy({ id });
+    // const user = await this.repository.findOneBy({ id });
+    const user = await this.usersService.findOne(id);
 
     if (!user) {
       throw new NotFoundException();
     }
 
-    await this.repository.remove(user);
+    await this.usersService.remove(user);
   }
 }
