@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { Goal } from 'src/goals/entities/goal.entity';
+import { User } from 'src/users/entities/user.entity';
 
 export default registerAs(
   'orm.config',
@@ -10,8 +10,8 @@ export default registerAs(
     port: 5432,
     username: 'postgres',
     password: 'postgres',
-    database: 'goaltracker-db',
-    entities: [Goal],
+    database: 'gap',
+    entities: [User],
     synchronize: false, // Disable this always in production
   }),
 );
