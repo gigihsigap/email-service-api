@@ -33,6 +33,10 @@ This is a birthday email blast application made using TypeScript and [Nest](http
 5. If the API request fails, it will be added to a different queue.
 6. Repeat the API request until the queue is empty (there's a limit to prevent endless loop).
 
+Other features:
+- A failsafe method for when there's a server crash, it runs through the queue immediately after rebooting.
+- CRUD functionalities. You can edit recipient's information and it will still send the birthday email accordingly.
+
 ## Installation
 
 ```bash
