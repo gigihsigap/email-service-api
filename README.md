@@ -24,6 +24,15 @@
 
 This is a birthday email blast application made using TypeScript and [Nest](https://github.com/nestjs/nest).
 
+## How it Works
+ 
+1. This app has a cron job that performs email blast every hour.
+2. It will check the list of emails, its timezone, and the user's birth date.
+3. If it's a birthday, it will be added to email queue.
+4. Run through the queue and send a request to 3rd-party API (a mock API).
+5. If the API request fails, it will be added to a different queue.
+6. Repeat the API request until the queue is empty (there's a limit to prevent endless loop).
+
 ## Installation
 
 ```bash
