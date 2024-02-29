@@ -26,7 +26,7 @@ export class TasksService {
     // Read all emails from DB and insert to email_queue DB
     const users = await this.userService.findAll();
 
-    const targetHour = 11; // Target hour to send emails, 9 for birthday
+    const targetHour = 9; // Target hour to send emails, 9 for birthday
     const currentUtcHour = moment.utc().hour(); // Current hour in UTC
     let offsetHours: number;
 
