@@ -19,14 +19,14 @@ export class TasksService {
 
   private readonly logger = new Logger(TasksService.name);
 
-  @Cron('0 * * * *') // At minute 0 (every hour)
+  @Cron('0 * * * *') // Run this function at every minute 0 (every hour)
   async getRecipientEmails() {
     this.logger.debug(`-----[STARTING: Birthday Email Blast]-----`);
 
     // Read all emails from DB and insert to email_queue DB
     const users = await this.userService.findAll();
 
-    const targetHour = 9; // Target hour to send emails, 9 for birthday
+    const targetHour = 9; // Target hour to send emails, 9 for birthday email (09.00)
     const currentUtcHour = moment.utc().hour(); // Current hour in UTC
     let offsetHours: number;
 
