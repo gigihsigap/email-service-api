@@ -4,27 +4,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from './dtos/index';
 
-const arr = [
-  {
-   id: '68830219-c5be-41f6-9709-637c5b302397',
-   first_name: 'Phoenix',
-   last_name: 'Wright',
-   birthdate: "1999-12-29T17:00:00.000Z",
-   location: 'America/Phoenix',
-   created_at: "2024-02-28T15:57:55.136Z",
-   updated_at: "2024-02-28T15:57:55.136Z"
- },
- {
-   id: '42ffa65f-5723-4dc7-86a5-d6c8fdb67e7f',
-   first_name: 'Maya',
-   last_name: 'Fey',
-   birthdate: "2003-12-29T17:00:00.000Z",
-   location: 'America/Phoenix',
-   created_at: "2024-02-28T15:59:12.433Z",
-   updated_at: "2024-02-28T15:59:12.433Z"
- }
-]
-
 @Injectable()
 export class UserService {
   constructor(
@@ -75,14 +54,18 @@ export class UserService {
   // --- Email Queue ---
 
   async readEmailQueue() {
-    return await this.emailQueueRepository.find();
+    return await this.emailQueueRepository.find({ relations: ['user'] });
   }
 
-  async addEmailQueue(input: CreateUserDto) {
-    // const email = await this.emailQueueRepository.save({
-    //   ...input,
-    // });
-    // return email;
+  async addEmailQueue(input: User[]) {
+    const emailQueues = input.map(user => {
+      const emailQueue = new EmailQueue();
+      emailQueue.user = user;
+      return emailQueue;
+    });
+
+    const savedEmailQueues = await this.emailQueueRepository.save(emailQueues);
+    return savedEmailQueues;
   }
 
   async removeEmailQueue(email: EmailQueue) {
@@ -93,18 +76,22 @@ export class UserService {
   // --- Failed Queue ---
 
   async readFailedQueue() {
-    return await this.emailQueueRepository.find();
+    return await this.failedQueueRepository.find({ relations: ['user'] });
   }
 
-  async addFailedQueue(input: CreateUserDto) {
-    // const email = await this.emailQueueRepository.save({
-    //   ...input,
-    // });
-    // return email;
+  async addFailedQueue(input: User[]) {
+    const failedQueues = input.map(user => {
+      const failedQueue = new FailedQueue();
+      failedQueue.user = user;
+      return failedQueue;
+    });
+
+    const savedFailedQueues = await this.failedQueueRepository.save(failedQueues);
+    return savedFailedQueues;
   }
 
   async removeFailedQueue(email: EmailQueue) {
-    await this.emailQueueRepository.remove(email);
+    await this.failedQueueRepository.remove(email);
     return true;
   }
 }

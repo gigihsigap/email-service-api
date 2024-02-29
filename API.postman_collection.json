@@ -1,0 +1,222 @@
+{
+	"info": {
+		"_postman_id": "bf8b4553-56ca-4099-ac85-ad551684e92c",
+		"name": "Email Service API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10571056"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Create New User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"first_name\": \"Iko\",\r\n    \"last_name\": \"Uwais\",\r\n    \"birthdate\": \"1976-03-01\",\r\n    \"template\": \"Birthday\",\r\n    \"email_address\": \"ikouwais@email.com\",\r\n    \"location\": \"Asia/Jakarta\"\r\n}\r\n// {\r\n//     \"first_name\": \"Hyun\",\r\n//     \"last_name\": \"Dai\",\r\n//     \"email_address\": \"hyundai@email.com\",\r\n//     \"template\": \"Birthday\",\r\n//     \"birthdate\": \"1999-12-30\",\r\n//     \"location\": \"Asia/Taipei\"\r\n// }\r\n// {\r\n//     \"first_name\": \"Mark\",\r\n//     \"last_name\": \"Robert\",\r\n//     \"email_address\": \"markrobert@email.com\",\r\n//     \"template\": \"Birthday\",\r\n//     \"birthdate\": \"1999-12-30\",\r\n//     \"location\": \"America/Toronto\"\r\n// }\r\n// {\r\n//     \"first_name\": \"Maya\",\r\n//     \"last_name\": \"Fey\",\r\n//     \"email_address\": \"mayafey@email.com\",\r\n//     \"template\": \"Birthday\",\r\n//     \"birthdate\": \"2003-03-01\",\r\n//     \"location\": \"America/Phoenix\"\r\n// }\r\n// {\r\n//     \"first_name\": \"Phoenix\",\r\n//     \"last_name\": \"Wright\",\r\n//     \"email_address\": \"aceattorney@email.com\",\r\n//     \"template\": \"Birthday\",\r\n//     \"birthdate\": \"1986-03-01\",\r\n//     \"location\": \"America/Phoenix\"\r\n// }\r\n// {\r\n//     \"first_name\": \"Jay\",\r\n//     \"last_name\": \"Garcia\",\r\n//     \"email_address\": \"saturn@email.com\",\r\n//     \"template\": \"Birthday\",\r\n//     \"birthdate\": \"1996-02-29\",\r\n//     \"location\": \"Asia/Jakarta\"\r\n// }"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/user/28622481-7f5a-44d8-8c5d-653188d77a21",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"28622481-7f5a-44d8-8c5d-653188d77a21"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"location\": \"Asia/Jakarta\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/user/007f075d-26ce-4709-a4e5-a72c0dfe2a87",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"007f075d-26ce-4709-a4e5-a72c0dfe2a87"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/user/c74b806f-e720-4207-a2f4-a17678856212",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"c74b806f-e720-4207-a2f4-a17678856212"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Email Queue",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Failed Queue",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/user/failed",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"user",
+								"failed"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Hello",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:4000"
+		}
+	]
+}

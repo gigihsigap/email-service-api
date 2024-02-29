@@ -1,26 +1,14 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, Interval, Timeout } from '@nestjs/schedule';
+import {
+  Cron,
+  Interval,
+  Timeout
+} from '@nestjs/schedule';
 import * as moment from 'moment-timezone';
-import { map } from 'rxjs/operators';
+// import { map } from 'rxjs/operators';
+import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
-
-// users DB
-// const users = [
-//   '1@gmail.com',
-//   '2@gmail.com',
-//   '3@gmail.com',
-//   '4@gmail.com',
-//   '5@gmail.com',
-//   '6@gmail.com',
-//   '7@gmail.com',
-//   '8@gmail.com',
-//   '9@gmail.com'
-// ]
-// email_queue DB
-const emailQueue = []
-// failed_queue DB
-const failedQueue = []
 
 @Injectable()
 export class TasksService {
@@ -31,16 +19,14 @@ export class TasksService {
 
   private readonly logger = new Logger(TasksService.name);
 
-  // @Timeout(5000) // Once after 5 seconds
-  // @Cron('* * * * *') // At every minute
   @Cron('0 * * * *') // At minute 0 (every hour)
   async getRecipientEmails() {
-    this.logger.debug('Retrieving all emails within the timezone...');
+    this.logger.debug(`-----[STARTING: Birthday Email Blast]-----`);
 
-    // TODO: Read all emails from DB and insert to email_queue DB
+    // Read all emails from DB and insert to email_queue DB
     const users = await this.userService.findAll();
 
-    const targetHour = 9; // Target hour to send emails
+    const targetHour = 11; // Target hour to send emails, 9 for birthday
     const currentUtcHour = moment.utc().hour(); // Current hour in UTC
     let offsetHours: number;
 
@@ -53,63 +39,113 @@ export class TasksService {
     }
 
     const selectedTimezoneOffset = moment().utcOffset(offsetHours * 60).format('Z');
-    // const selectedTimezoneOffset = '+09:00'; // Example: Selecting '+07:00' hours UTC
 
-    console.log("currentUtcHour", currentUtcHour)
-    console.log("selectedTimezoneOffset", selectedTimezoneOffset)
+    this.logger.debug(`Selected timezone: ${selectedTimezoneOffset}`)
 
     const filteredUsers = users.filter((user) => {
-      let userTimezoneOffset = moment.tz(user.location).format('Z'); // Get the timezone offset of the user's location
-      return userTimezoneOffset === selectedTimezoneOffset;
+      const userTimezoneOffset = moment.tz(user.location).format('Z'); // Get the timezone offset of the user's location
+      const userBirthdate = moment(user.birthdate).tz(user.location); // Convert user's birthdate to their timezone
+      // console.log(`User's birthday: ${userBirthdate.day()} - ${userBirthdate.month()} | Today's date: ${moment().day()} - ${moment().month()}`)
+      const isBirthdayToday = (userBirthdate.day() === moment().day()) && (userBirthdate.month() === moment().month()); // Check for matching day and month
+      return (userTimezoneOffset === selectedTimezoneOffset) && isBirthdayToday;
     });
 
-    console.log("Filtered user:", filteredUsers)
+    this.logger.debug(`Number of birthday emails to send: ${filteredUsers.length}`)
 
-    // TODO: Write to email_queue table
+    // Write to email_queue table
+    await this.userService.addEmailQueue(filteredUsers);
 
+    // Attempt sending email
     await this.processQueueEmails();
+
+    this.logger.debug(`-----[FINISHED: Birthday Email Blast]-----`);
   }
 
   async processQueueEmails() {
-    // TODO: Read all emails from email_queue table
-    const emails = emailQueue;
-    const errorEmails = [];
+    // Read all emails from email_queue table
+    const emails = await this.userService.readEmailQueue()
+    this.logger.debug(`Number of emails in active queue: ${emails.length}`)
 
-    for (const [id, email] of emails.entries()) {
-      this.logger.debug(`Sending email ${email}... ${id}`);
+    const errorList: User[] = [];
+
+    for (const each of emails) {
+      const { user } = each;
       try {
         const response = await this.httpService.post('https://email-service.digitalenvision.com.au/send-email', {
-          email: "test@digitalenvision.com.au",
-          message: 'Hi, nice to meet you.',
+          email: user.email_address,
+          message: `Hey ${user.first_name} ${user.last_name}, it’s your birthday!`,
         }).toPromise(); // Convert Observable to Promise and await for result
-        console.log("Successful sending email:", email);
+
+        this.logger.debug(`${response.status} - ${user.email_address}`);
 
       } catch (error) {
-        console.log("Error sending email:", email)
-        errorEmails.push(email);
+        this.logger.error(`${error?.message} - ${user.email_address}`);
+        errorList.push(user);
       }
 
-      // TODO: Remove data from emailQueue
-      console.log("Removing from queue...", email)
+      // Remove data from email_queue table
+      await this.userService.removeEmailQueue(each)
     }
 
-    if (errorEmails.length > 0) this.queueFailedEmails(errorEmails) 
+    // If there's any failed API request, write to failed_queue table and trigger processFailedEmails
+    if (errorList.length > 0) {
+      await this.userService.addFailedQueue(errorList);
+      await this.processFailedEmails();
+    }
   }
 
   async processFailedEmails() {
-    // TODO: Read all emails from failed_queue table
-    const emails = failedQueue;
-    const errorEmails = [];
+    let attemptCount = 0;
+    do {
+      // Read all emails from failed_queue table
+      const emails = await this.userService.readFailedQueue();
+      this.logger.debug(`Number of emails in failed queue: ${emails.length}`);
+
+      const errorList: User[] = [];
+
+      for (const each of [...emails]) {
+        const { user } = each;
+        try {
+          const response = await this.httpService.post('https://email-service.digitalenvision.com.au/send-email', {
+            email: user.email_address,
+            message: `Hey ${user.first_name} ${user.last_name}, it’s your birthday!`,
+          }).toPromise(); // Convert Observable to Promise and await for result
+          this.logger.debug(`${response.status} - ${user.email_address}`);
+
+          // If successful, remove data from failed_queue
+          await this.userService.removeFailedQueue(each);
+        } catch (error) {
+          this.logger.error(`${error?.message} - ${user.email_address}`);
+          errorList.push(user);
+        }
+      }
+
+      // If there are failed API requests, add them to failed_queue and retry up to 3 times
+      if (errorList.length > 0) {
+        await this.userService.addFailedQueue(errorList);
+        attemptCount++;
+      } else {
+        break; // Exit the loop if all emails were sent successfully
+      }
+    } while (attemptCount < 3);
+  }
+
+  @Timeout(5000) // Run once after 5 seconds of bootup, in case of server going down
+  async startUpTask() {
+    this.logger.debug(`-----[STARTING: Start-up Task]-----`);
+    await this.blastPendingEmail();
+    this.logger.debug(`-----[FINISHED: Start-up Task]-----`);
+  }
+
+  async blastPendingEmail() {
+    // Check for remaining failed_queue and resend them all
+    await this.processFailedEmails();
+
+    // Check for pending email_queue and send them all
+    await this.processQueueEmails();
   }
   
-
-  async queueFailedEmails(emails: Array<any>) {
-    // TODO: Write all emails at once to failedQueue, no need to do loop
-    console.log("Writing emails to failedQueue table:", emails)
-  }
-
-  
-
+  /*----- Examples -----*/
   
   // @Cron('45 * * * * *')
   // handleCron() {
@@ -126,5 +162,4 @@ export class TasksService {
   //   this.logger.debug('Called once after 5 seconds');
   // }
 }
-
 

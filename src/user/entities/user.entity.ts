@@ -2,39 +2,58 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
   PrimaryGeneratedColumn,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
+import * as moment from 'moment-timezone';
 import { IsEmail } from 'class-validator';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
-@Entity()
-@Index(['email_address', 'template'], { unique: true })
+@Entity('user')
+@Unique(['email_address', 'template'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: number;
+  id: string;
 
-  @PrimaryColumn()
+  @Column({ nullable: false })
   @IsEmail()
   email_address: string;
 
-  @PrimaryColumn()
-  template: string;
+  @Column({
+    nullable: false,
+    default: "Birthday"
+  })
+  template: string
 
-  @Column()
+  @Column({ nullable: false })
   first_name: string;
 
-  @Column()
+  @Column({ nullable: false })
   last_name: string;
 
   @Column({ nullable: false })
   birthdate: Date;
 
-  @Column({ nullable: false })
+  @Column({
+    nullable: false,
+    transformer: {
+      to(value) {
+        if (!value) return "Asia/Jakarta"; // Default value
+        if (!isValidTimezone(value)) {
+          throw new HttpException('Invalid timezone', HttpStatus.BAD_REQUEST);
+        }
+        return value;
+      },
+      from(value) {
+        return value;
+      },
+    },
+  })
   location: string;
 
   @CreateDateColumn()
@@ -44,47 +63,32 @@ export class User {
   updated_at: Date;
 }
 
-@Entity()
+@Entity('email_queue')
 export class EmailQueue {
-  @CreateDateColumn()
   @PrimaryColumn()
-  timestamp: Date;
+  id: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn([{ name: 'email_address', referencedColumnName: 'email_address' }, { name: 'template', referencedColumnName: 'template' }])
+  @ManyToOne(() => User, user => user.email_address)
+  @JoinColumn({ name: 'id' })
   user: User;
+
+  @CreateDateColumn()
+  timestamp: Date;
 }
 
-@Entity()
+@Entity('failed_queue')
 export class FailedQueue {
-  @CreateDateColumn()
   @PrimaryColumn()
-  timestamp: Date;
+  id: string;
 
-  @ManyToOne(() => User)
-  @JoinColumn([{ name: 'email_address', referencedColumnName: 'email_address' }, { name: 'template', referencedColumnName: 'template' }])
+  @ManyToOne(() => User, user => user.email_address)
+  @JoinColumn({ name: 'id' })
   user: User;
+
+  @CreateDateColumn()
+  timestamp: Date;
 }
 
-
-// @Entity()
-// export class User {
-//   @PrimaryGeneratedColumn('uuid')
-//   id: number;
-
-//   @Column()
-//   name: string;
-
-//   @Column({
-//     type: 'enum',
-//     enum: Status,
-//     default: Status.PENDING,
-//   })
-//   status: Status;
-
-//   @CreateDateColumn()
-//   created_at: Date;
-
-//   @UpdateDateColumn()
-//   updatedAt: Date;
-// }
+function isValidTimezone(timezone) {
+  return moment.tz.zone(timezone) !== null;
+}

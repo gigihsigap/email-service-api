@@ -9,8 +9,6 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from './dtos/index';
 import { UserService } from './user.service';
 
@@ -21,8 +19,22 @@ export class UserController {
     private readonly userService: UserService
   ) {}
 
+   // GET /api/v1/user/:id
+   @Get('/queue')
+   async findAllEmailQueue() {
+     const user = await this.userService.readEmailQueue();
+     return { success: true, data: user };
+   }
+
+   // GET /api/v1/user/:id
+   @Get('/failed')
+   async findAllFailedQueue() {
+     const user = await this.userService.readFailedQueue();
+     return { success: true, data: user };
+   }
+
   // GET /api/v1/users
-  @Get()
+  @Get('/')
   async findAll() {
     const users = await this.userService.findAll();
 

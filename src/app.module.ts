@@ -10,6 +10,7 @@ import { UserController } from './user/user.controller';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './task/task.module';
 import { UserService } from './user/user.service';
+import { TasksService } from './task/task.service';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { UserService } from './user/user.service';
     TypeOrmModule.forFeature([User, EmailQueue, FailedQueue])
   ],
   controllers: [AppController, UserController],
-  providers: [AppService, UserService],
+  providers: [AppService , UserService],
 })
 export class AppModule {}
 
