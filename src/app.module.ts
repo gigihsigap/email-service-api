@@ -10,7 +10,6 @@ import { UserController } from './user/user.controller';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './task/task.module';
 import { UserService } from './user/user.service';
-import { TasksService } from './task/task.service';
 
 @Module({
   imports: [

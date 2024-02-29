@@ -14,7 +14,6 @@ import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
-  // Dependency Injection
   constructor(
     private readonly userService: UserService
   ) {}

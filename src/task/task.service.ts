@@ -2,7 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   Cron,
-  Interval,
+  // Interval,
   Timeout
 } from '@nestjs/schedule';
 import * as moment from 'moment-timezone';
